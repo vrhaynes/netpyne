@@ -117,6 +117,8 @@ It is also possible to create a special type of population consisting of NetStim
 
 * **source** - Source of noise (optional; currently set to ``random`` by default, which is the only option implemented)
 
+* **seed** - Seed for randomizer (optional; defaults to value set in simConfig['seeds']['stim'])
+
 Example of NetStim population::
 	
 	netParams['popParams'].append({'popLabel': 'background', 'cellModel': 'NetStim', 'rate': 100, 'noise': 0.5})  # background inputs
@@ -283,7 +285,7 @@ Each item of the ``connParams`` list contains a dictionary that defines a connec
 
 	Sets ``connFunc`` to ``probConn`` (internal probabilistic connectivity function).
 
-	Overrides the ``convergence`` and ``divergence`` parameters.
+	Overrides the ``convergence``, ``divergence`` and ``fromList`` parameters.
 
 * **convergence** (optional) - Number of pre-synaptic cells connected to each post-synaptic cell.
 
@@ -291,7 +293,7 @@ Each item of the ``connParams`` list contains a dictionary that defines a connec
 
 	Sets ``connFunc`` to ``convConn`` (internal convergence connectivity function).
 
-	Overrides the ``divergence`` parameter; has no effect if the ``probability`` parameters is included.
+	Overrides the ``divergence`` and ``fromList`` parameters; has no effect if the ``probability`` parameters is included.
 
 * **divergence** (optional) - Number of post-synaptic cells connected to each pre-synaptic cell.
 
@@ -299,10 +301,18 @@ Each item of the ``connParams`` list contains a dictionary that defines a connec
 	
 	Sets ``connFunc`` to ``divConn`` (internal divergence connectivity function).
 
-	Has no effect if the ``probability`` or ``convergence`` parameters are included.
+	Overrides the ``fromList`` parameter; has no effect if the ``probability`` or ``convergence`` parameters are included.
+
+* **connList** (optional) - Explicit list of connections between individual pre- and post-synaptic cells.
+
+	Each connection is indicated with relative ids of cell in pre and post populations, e.g. ``[[0,1],[3,1]]`` creates a connection between pre cell 0 and post cell 1; and pre cell 3 and post cell 1.
+
+	Sets ``connFunc`` to ``fromList`` (explicit list connectivity function).
+
+	Has no effect if the ``probability``, ``convergence`` or ``divergence`` parameters are included.
 
 * **connFunc** (optional) - Internal connectivity function to use. 
-	Its automatically set to ``probConn``, ``convConn`` or ``divConn``, when the ``probability``, ``convergence`` and ``divergence`` parameters are included, respectively. Otherwise defaults to ``fullConn``, ie. all-to-all connectivity.
+	Its automatically set to ``probConn``, ``convConn``, ``divConn`` or ``fromList``, when the ``probability``, ``convergence``, ``divergence`` or ``connList`` parameters are included, respectively. Otherwise defaults to ``fullConn``, ie. all-to-all connectivity.
 
 	User-defined connectivity functions can be added.
 

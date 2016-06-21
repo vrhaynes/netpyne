@@ -27,7 +27,10 @@ simConfig = {}  # dictionary to store sets of simulation configurations
 # Population parameters
 netParams['popParams'] = []  # create list of populations - each item will contain dict with pop params
 netParams['popParams'].append({'popLabel': 'PYR', 'cellModel': 'HH', 'cellType': 'PYR', 'numCells': 20}) # add dict with params for this pop 
-netParams['popParams'].append({'popLabel': 'background', 'cellModel': 'NetStim', 'rate': 50, 'noise': 0.5, 'start':100, 'source': 'random'})  # background inputs
+netParams['popParams'].append({'popLabel': 'background', 'cellModel': 'NetStim', 'rate': 100, 'noise': 0.5, 'start':1, 'source': 'random', 'seed':2})  # background inputs
+netParams['popParams'].append({'popLabel': 'background2', 'cellModel': 'NetStim', 'rate': 100, 'noise': 0.5, 'start':500, 'source': 'random', 'seed':2})  # background inputs
+
+
 
 # Synaptic mechanism parameters
 netParams['synMechParams'] = []
@@ -47,12 +50,10 @@ netParams['cellParams'].append(cellRule)  # add dict to list of cell properties
 
 
 ### HH
-cellRule = {'label': 'PYR_HH_rule', 'conditions': {'cellType': 'PYR', 'cellModel': 'HH'}} 	# cell rule dict
-synMechParams = []
-utils.importCell(cellRule=cellRule, synMechParams=netParams['synMechParams'], fileName='HHCellFile.py', cellName='HHCellClass')
-netParams['cellParams'].append(cellRule)  												# add dict to list of cell parameters
-
-print netParams
+# cellRule = {'label': 'PYR_HH_rule', 'conditions': {'cellType': 'PYR', 'cellModel': 'HH'}} 	# cell rule dict
+# synMechParams = []
+# utils.importCell(cellRule=cellRule, synMechParams=netParams['synMechParams'], fileName='HHCellFile.py', cellName='HHCellClass')
+# netParams['cellParams'].append(cellRule)  												# add dict to list of cell parameters
 
 
 # Stimulation parameters
@@ -68,14 +69,14 @@ print netParams
 # Connectivity parameters
 netParams['connParams'] = []  
 
-netParams['connParams'].append(
-    {'preTags': {'popLabel': 'PYR'}, 'postTags': {'popLabel': 'PYR'},
-    'weight': 0.005,                    # weight of each connection
-    'delay': '0.2+gauss(13.0,1.4)',     # delay min=0.2, mean=13.0, var = 1.4
-    'threshold': 10,                    # threshold
-    'convergence': 'uniform(1,15)'})    # convergence (num presyn targeting postsyn) is uniformly distributed between 1 and 15
-
 # netParams['connParams'].append(
+#     {'preTags': {'popLabel': 'PYR'}, 'postTags': {'popLabel': 'PYR'},
+#     'weight': 0.005,                    # weight of each connection
+#     'delay': '0.2+gauss(13.0,1.4)',     # delay min=0.2, mean=13.0, var = 1.4
+#     'threshold': 10,                    # threshold
+#     'convergence': 'uniform(1,15)'})    # convergence (num presyn targeting postsyn) is uniformly distributed between 1 and 15
+
+# # netParams['connParams'].append(
 #     {'preTags': {'popLabel': 'PYR'}, 'postTags': {'popLabel': 'PYR'},
 #     'connList': [[0,1],[3,1]],			# list of connections
 #     'weight': [0.005, 0.001],           # weight of each connection
@@ -84,10 +85,17 @@ netParams['connParams'].append(
 
 
 netParams['connParams'].append(
-    {'preTags': {'popLabel': 'background'}, 'postTags': {'cellType': 'PYR'}, # background -> PYR
+    {'preTags': {'popLabel': 'background2'}, 'postTags': {'cellType': 'PYR'}, # background -> PYR
     'weight': 0.1,                    # fixed weight of 0.08
     'synMech': 'AMPA',                     # target NMDA synapse
     'delay': 'uniform(1,5)'})           # uniformly distributed delays between 1-5ms
+
+# netParams['connParams'].append(
+#     {'preTags': {'popLabel': 'background2'}, 'postTags': {'cellType': 'PYR'}, # background -> PYR
+#     'weight': 0.1,                    # fixed weight of 0.08
+#     'synMech': 'AMPA',                     # target NMDA synapse
+#     'delay': 'uniform(1,5)'})           # uniformly distributed delays between 1-5ms
+
 
 
 ###############################################################################
@@ -129,7 +137,7 @@ simConfig['maxspikestoplot'] = 3e8 # Maximum number of spikes to plot
 simConfig['plotConn'] = False # whether to plot conn matrix
 simConfig['plotWeightChanges'] = False # whether to plot weight changes (shown in conn matrix)
 simConfig['plot3dArch'] = False # plot 3d architecture
-simConfig['plot2Dnet'] = True           # Plot recorded traces for this list of cells
+simConfig['plot2Dnet'] = False          # Plot recorded traces for this list of cells
 
 
 

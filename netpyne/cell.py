@@ -149,7 +149,7 @@ class Cell(object):
                     loc = pointpParams['loc'] if 'loc' in pointpParams else 0.5  # set location
                     sec['pointps'][pointpName]['hPointp'] = pointpObj(loc, sec = sec['hSection'])  # create h Pointp object (eg. h.Izhi2007b)
                     for pointpParamName,pointpParamValue in pointpParams.iteritems():  # add params of the point process
-                        if pointpParamName not in ['mod', 'loc']:
+                        if pointpParamName not in ['mod', 'loc'] and not pointpParamName.startswith('_'):
                             setattr(sec['pointps'][pointpName]['hPointp'], pointpParamName, pointpParamValue)
 
             # set geometry params 
@@ -253,8 +253,7 @@ class Cell(object):
         sec = self.secs[params['sec']]
 
         weightIndex = 0  # set default weight matrix index
-        if not 'loc' in params: params['loc'] = 0.5  # default synMech location  
-        if not params['threshold']: params['threshold'] = 10.0  # default NetCon threshold    
+        if not 'loc' in params: params['loc'] = 0.5  # default synMech location    
 
         pointp = None
         if 'pointps' in self.secs[params['sec']]:  #  check if point processes with '_vref' (artificial cell)
@@ -328,8 +327,7 @@ class Cell(object):
 
         weightIndex = 0  # set default weight matrix index
         if not 'loc' in params: params['loc'] = 0.5  # default synMech location 
-        if not params['threshold']: params['threshold'] = 10.0  # default NetCon threshold      
-
+ 
         pointp = None
         if 'pointps' in sec:  # check if point processes (artificial cell)
             for pointpName, pointpParams in sec['pointps'].iteritems():
