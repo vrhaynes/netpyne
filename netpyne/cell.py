@@ -12,7 +12,6 @@ from time import sleep
 from neuron import h # Import NEURON
 from specs import Dict
 import numpy as np
-from random import seed, uniform
 import sim
 
 
@@ -418,10 +417,10 @@ class CompartCell (Cell):
                                 ionParamValueFinal = ionParamValue[iseg]
                             if ionParamName == 'e':
                                 seg.__setattr__(ionParamName+ionName,ionParamValueFinal)
-                            elif ionParamName == 'init_ext_conc':
+                            elif ionParamName == 'o':
                                 seg.__setattr__('%so'%ionName,ionParamValueFinal)
                                 h('%so0_%s_ion = %s'%(ionName,ionName,ionParamValueFinal))  # e.g. cao0_ca_ion, the default initial value
-                            elif ionParamName == 'init_int_conc':
+                            elif ionParamName == 'i':
                                 seg.__setattr__('%si'%ionName,ionParamValueFinal)
                                 h('%si0_%s_ion = %s'%(ionName,ionName,ionParamValueFinal))  # e.g. cai0_ca_ion, the default initial value
                                 
@@ -687,11 +686,11 @@ class CompartCell (Cell):
             synMechs, synMechSecs, synMechLocs = self._setConnSynMechs(params, secLabels)
             if synMechs == -1: return
 
-        # Adapt weight based on section weightNorm (normalization based on section location)
-        for i,(sec,loc) in enumerate(zip(synMechSecs, synMechLocs)):
-            if 'weightNorm' in self.secs[sec] and isinstance(self.secs[sec]['weightNorm'], list): 
-                nseg = self.secs[sec]['geom']['nseg']
-                weights[i] = weights[i] * self.secs[sec]['weightNorm'][int(round(loc*nseg))-1] 
+            # Adapt weight based on section weightNorm (normalization based on section location)
+            for i,(sec,loc) in enumerate(zip(synMechSecs, synMechLocs)):
+                if 'weightNorm' in self.secs[sec] and isinstance(self.secs[sec]['weightNorm'], list): 
+                    nseg = self.secs[sec]['geom']['nseg']
+                    weights[i] = weights[i] * self.secs[sec]['weightNorm'][int(round(loc*nseg))-1] 
 
         # Create connections
         for i in range(params['synsPerConn']):
@@ -938,9 +937,9 @@ class CompartCell (Cell):
             else:  
                 if sim.cfg.verbose: print '  Error: no Section available on cell gid=%d to add stim'%(self.gid)
                 return 
-
+                
         sec = self.secs[params['sec']]
-        
+
         if not 'loc' in params: params['loc'] = 0.5  # default stim location 
 
         if params['type'] == 'NetStim':
@@ -1006,7 +1005,7 @@ class CompartCell (Cell):
                     if sim.cfg.verbose: print('   originalFormat: %s'%(params['originalFormat']))
                     if params['originalFormat']=='NeuroML2_stochastic_input':
                         rand = h.Random()
-                        rand.Random123(params['stim_count'], sim.id32('%d'%(sim.cfg.seeds['stim'])))
+                        rand.Random123(sim.id32('stim_exotic'), params['stim_count'], sim.cfg.seeds['stim'])
                         rand.negexp(1)
                         stim.noiseFromRandom(rand)
                         self.stims.append(Dict())  # add new stim to Cell object
@@ -1067,6 +1066,7 @@ class CompartCell (Cell):
 
         if isinstance(params['weight'],list):
             weights = [scaleFactor * w for w in params['weight']]
+            if len(weights) == 1: weights = [weights[0]] * params['synsPerConn']
         else:
             weights = [scaleFactor * params['weight']] * params['synsPerConn']
         
@@ -1110,7 +1110,11 @@ class CompartCell (Cell):
             if len(secLabels) == 1:  # if single section, create all syns there
                 synMechSecs = [secLabels[0]] * synsPerConn  # same section for all 
                 if isinstance(params['loc'], list):
-                    if len(params['loc']) == synsPerConn: synMechLocs = params['loc']
+                    if len(params['loc']) == synsPerConn: 
+                        synMechLocs = params['loc']
+                    else:
+                        print "Error: The length of the list of locations does not match synsPerConn (distributing uniformly)"
+                        synMechSecs, synMechLocs = self._distributeSynsUniformly(secList=secLabels, numSyns=synsPerConn)
                 else:
                     synMechLocs = [i*(1.0/synsPerConn)+1.0/synsPerConn/2 for i in range(synsPerConn)]
             else:  # if multiple sections, distribute syns
@@ -1204,8 +1208,9 @@ class PointCell (Cell):
 
         # if rate is list with 2 items generate random value from uniform distribution
         if 'rate' in self.params and isinstance(self.params['rate'], list) and len(self.params['rate']) == 2:
-            seed(sim.id32('%d'%(sim.cfg.seeds['conn']+self.gid)))  # initialize randomizer 
-            self.params['rate'] = uniform(self.params['rate'][0], self.params['rate'][1])
+            rand = h.Random()
+            rand.Random123(sim.id32('point_rate'), self.gid, sim.cfg.seeds['stim']) # initialize randomizer 
+            self.params['rate'] = rand.uniform(self.params['rate'][0], self.params['rate'][1])
  
         # set pointp params - for PointCells these are stored in self.params
         params = {k: v for k,v in self.params.iteritems()}
@@ -1227,7 +1232,7 @@ class PointCell (Cell):
                 params['number'] = 1e9 
                 setattr(self.hPointp, 'number', params['number']) 
             if 'seed' not in self.params: 
-                self.params['seed'] = sim.cfg.seeds['stim'] # note: random number generator initialized via noiseFromRandom() from sim.preRun()
+                self.params['seed'] = sim.cfg.seeds['stim'] # note: random number generator initialized from sim.preRun()
         
 
         # VecStim - generate spike vector based on params
@@ -1261,7 +1266,7 @@ class PointCell (Cell):
                 else:
                     # plus negexp interval of mean duration noise*interval. Note that the most likely negexp interval has duration 0.
                     rand = h.Random()
-                    rand.Random123(self.gid, sim.id32('%d'%(self.params['seed'])))
+                    rand.Random123(sim.id32('vecstim_spkt'), self.gid, self.params['seed'])
 
                     # Method 1: vec length depends on duration -- not reproducible
                     # vec = h.Vector(numSpks)
@@ -1309,7 +1314,7 @@ class PointCell (Cell):
 
             # pulse list: start, end, rate, noise
             if 'pulses' in self.params:
-                for pulse in self.params['pulses']:
+                for ipulse, pulse in enumerate(self.params['pulses']):
                     
                     # check interval or rate params
                     if 'interval' in pulse:
@@ -1343,7 +1348,7 @@ class PointCell (Cell):
                         else:
                             # plus negexp interval of mean duration noise*interval. Note that the most likely negexp interval has duration 0.
                             rand = h.Random()
-                            rand.Random123(self.gid, sim.id32('%d'%(self.params['seed'])))
+                            rand.Random123(ipulse, self.gid, self.params['seed'])
                             
                             # Method 1: vec length depends on duration -- not reproducible
                             # vec = h.Vector(len(fixedInterval))
