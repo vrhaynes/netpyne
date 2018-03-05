@@ -426,8 +426,9 @@ def plotRates (include =['allCells', 'eachPop'], peakBin = 5, timeRanges = None,
         #ax1.set_xlabel('Time period', fontsize=fontsiz)
         ax1.set_ylabel('Avg firing rate', fontsize=fontsiz)
         ax1.set_xticks(range(len(timeRangeLabels)))
-        ax1.set_xticklabels(timeRangeLabels)
+        ax1.set_xticklabels(timeRangeLabels, fontsize=fontsiz)
         ax1.set_xlim(-0.5, len(avgs)-0.5)
+        if ylim: ax1.set_ylim(ylim)
         ax1.legend(include)
 
         try:
@@ -455,6 +456,7 @@ def plotRates (include =['allCells', 'eachPop'], peakBin = 5, timeRanges = None,
         ax2.set_xticks(range(len(timeRangeLabels)))
         ax2.set_xticklabels(timeRangeLabels)
         ax2.set_xlim(-0.5, len(peaks)-0.5)
+        if ylim: ax2.set_ylim(ylim)
         ax2.legend(include)
 
         try:
@@ -1013,7 +1015,7 @@ def plotSpikeStats (include = ['allCells', 'eachPop'], timeRange = None, graphTy
     for stat in stats:
         # create fig
         fig,ax1 = plt.subplots(figsize=figSize)
-        fontsiz = 16
+        fontsiz = fontsize
 
         statData = []
 
