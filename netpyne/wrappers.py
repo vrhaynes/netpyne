@@ -1,6 +1,6 @@
 
 """
-simFunc.py 
+simFunc.py
 
 Contains wrapper functions to create, load, simulate, analyze etc the network
 
@@ -30,7 +30,7 @@ def create (netParams=None, simConfig=None, output=False):
     simData = sim.setupRecording()             # setup variables to record for each cell (spikes, V traces, etc)
 
     if output: return (pops, cells, conns, stims, simData)
-    
+
 
 ###############################################################################
 # Wrapper to simulate network
@@ -38,9 +38,9 @@ def create (netParams=None, simConfig=None, output=False):
 def simulate ():
     ''' Sequence of commands to simulate network '''
     import sim
-    sim.runSim()                      # run parallel Neuron simulation  
+    sim.runSim()                      # run parallel Neuron simulation
     sim.gatherData()                  # gather spiking data and cell info from each node
-    
+
 
 ###############################################################################
 # Wrapper to simulate network
@@ -48,20 +48,20 @@ def simulate ():
 def analyze ():
     ''' Sequence of commands to simulate network '''
     import sim
-    sim.saveData()                      # run parallel Neuron simulation  
+    sim.saveData()                      # run parallel Neuron simulation
     sim.analysis.plotData()                  # gather spiking data and cell info from each node
 
 
 ###############################################################################
-# Wrapper to create, simulate, and analyse network
+# Wrapper to create and simulate network
 ###############################################################################
 def createSimulate (netParams=None, simConfig=None, output=False):
     ''' Sequence of commands create, simulate and analyse network '''
     import sim
     (pops, cells, conns, stims, simData) = sim.create(netParams, simConfig, output=True)
-    sim.simulate() 
+    sim.simulate()
 
-    if output: return (pops, cells, conns, stims, simData)    
+    if output: return (pops, cells, conns, stims, simData)
 
 
 ###############################################################################
@@ -71,7 +71,7 @@ def createSimulateAnalyze (netParams=None, simConfig=None, output=False):
     ''' Sequence of commands create, simulate and analyse network '''
     import sim
     (pops, cells, conns, stims, simData) = sim.create(netParams, simConfig, output=True)
-    sim.simulate() 
+    sim.simulate()
     sim.analyze()
 
     if output: return (pops, cells, conns, stims, simData)
@@ -94,7 +94,7 @@ def load (filename, simConfig=None, output=False, instantiate=True, createNEURON
         stims = sim.net.addStims()                    # add external stimulation to cells (IClamps etc)
     simData = sim.setupRecording()              # setup variables to record for each cell (spikes, V traces, etc)
 
-    if output: 
+    if output:
         try:
             return (pops, cells, conns, stims, simData)
         except:
@@ -121,7 +121,7 @@ def loadSimulateAnalyze (filename, simConfig=None, output=False):
     sim.analyze()
 
     #if output: return (pops, cells, conns, stims, simData)
-        
+
 
 ###############################################################################
 # Wrapper to create and export network to NeuroML2
@@ -142,12 +142,12 @@ def createExportNeuroML2 (netParams=None, simConfig=None, reference=None, connec
     sim.exportNeuroML2(reference,connections,stimulations)     # export cells and connectivity to NeuroML 2 format
 
     if output: return (pops, cells, conns, stims, simData)
-    
-    
+
+
 ###############################################################################
 # Wrapper to import network from NeuroML2
 ###############################################################################
 def importNeuroML2SimulateAnalyze(fileName, simConfig):
     import sim
-        
+
     return sim.importNeuroML2(fileName, simConfig, simulate=True, analyze=True)
