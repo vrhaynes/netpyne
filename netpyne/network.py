@@ -769,7 +769,7 @@ class Network (object):
 
 
     ###############################################################################
-    ### Traub cellular connectivity
+    ###  cellular connectivity
     ###############################################################################
     def traubCellConn(self, preCellsTags, postCellsTags, connParam):
         ''' Generates connections between all pre and post-syn cells based on random sampling from pre-synaptic population with replacement
@@ -777,6 +777,7 @@ class Network (object):
             For description, see:
                 Traub R.D., et al. (2005)
         '''
+        import sim
         if sim.cfg.verbose: print 'Generating set of randomly sampled connections with replacement (rule: %s) ...' % (connParam['label'])
 
 
